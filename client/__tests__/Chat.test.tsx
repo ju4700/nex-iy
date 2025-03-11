@@ -1,5 +1,7 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Chat from '@components/Chat';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import Chat from '../src/components/Chat';
 import { vi, describe, it, expect } from 'vitest';
 
 vi.mock('socket.io-client', () => {
@@ -7,13 +9,15 @@ vi.mock('socket.io-client', () => {
     connect: vi.fn(),
     disconnect: vi.fn(),
     on: vi.fn().mockImplementation((event, callback) => {
-      if (event === 'connect') callback(); 
+      if (event === 'connect') callback();
     }),
     off: vi.fn(),
     emit: vi.fn(),
+    connected: true,
   };
   return {
     default: vi.fn(() => mockSocket),
+    io: vi.fn(() => mockSocket),
   };
 });
 
@@ -39,35 +43,51 @@ global.fetch = vi.fn(() =>
 
 describe('Chat Component', () => {
   it('renders without crashing', () => {
-    render(<Chat />);
+    act(() => {
+      render(<Chat />);
+    });
     expect(screen.getByText('Team Chat')).toBeInTheDocument();
   });
 
   it('disables input when disconnected', () => {
-    render(<Chat />);
+    const mockSocket = require('socket.io-client').default();
+    vi.spyOn(mockSocket, 'connected', 'get').mockReturnValue(false);
+    act(() => {
+      render(<Chat />);
+    });
     const input = screen.getByLabelText(/Enter your message/i);
     expect(input).toBeDisabled();
   });
 
   it('fetches messages on mount', async () => {
-    render(<Chat />);
+    act(() => {
+      render(<Chat />);
+    });
     await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/messages'));
   });
 
   it('sends a message on button click', () => {
-    render(<Chat />);
+    act(() => {
+      render(<Chat />);
+    });
     const input = screen.getByLabelText(/Enter your message/i);
     const button = screen.getByText('Send');
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.click(button);
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.click(button);
+    });
     expect(input).toHaveValue('');
   });
 
   it('sends a message on Enter key', () => {
-    render(<Chat />);
+    act(() => {
+      render(<Chat />);
+    });
     const input = screen.getByLabelText(/Enter your message/i);
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+    });
     expect(input).toHaveValue('');
   });
 });
