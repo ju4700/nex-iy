@@ -86,7 +86,7 @@ describe('Tasks Component', () => {
     expect(sortButton).toHaveTextContent('Sort ↑');
     
     // Reset fetch mock to track the next call
-    global.fetch.mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
     
     await act(async () => {
       fireEvent.click(sortButton);
