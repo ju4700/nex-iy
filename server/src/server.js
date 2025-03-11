@@ -1,8 +1,7 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
-import 'dotenv/config';
+import connectDB from './config.js';
 import logger from './logger.js';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -11,7 +10,7 @@ import { body, validationResult } from 'express-validator';
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || 'http://localhost:3000', methods: ['GET', 'POST'] },
+  cors: { origin: process.env.CLIENT_URL, methods: ['GET', 'POST'] },
 });
 
 // Middleware
@@ -19,31 +18,18 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
     message: 'Too many requests from this IP, please try again later.',
   })
 );
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.url} at ${new Date().toISOString()}`);
+  logger.info(`${req.method} ${req.url} - ${new Date().toISOString()}`);
   next();
 });
 
 // MongoDB Connection
-const connectWithRetry = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/nexiy', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
-    });
-    logger.info('MongoDB connected successfully');
-  } catch (err) {
-    logger.error('MongoDB connection error:', err.message);
-    setTimeout(connectWithRetry, 5000);
-  }
-};
-connectWithRetry();
+connectDB();
 
 // Schemas
 const messageSchema = new mongoose.Schema({
@@ -112,21 +98,15 @@ app.post('/api/tasks', [
   if (!errors.isEmpty()) {
     return res.status(400).json({ status: 'error', message: errors.array() });
   }
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { title, boardId } = req.body;
     const task = new Task({ title, boardId });
-    await task.save({ session });
-    await session.commitTransaction();
+    await task.save();
     res.status(201).json({ status: 'success', data: task });
     logger.info(`Task created: ${task._id}`);
   } catch (err) {
-    await session.abortTransaction();
     logger.error('Task create error:', err.stack);
     res.status(500).json({ status: 'error', message: 'Server error' });
-  } finally {
-    session.endSession();
   }
 });
 
@@ -147,21 +127,15 @@ app.post('/api/boards', [
   if (!errors.isEmpty()) {
     return res.status(400).json({ status: 'error', message: errors.array() });
   }
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { name } = req.body;
     const board = new Board({ name });
-    await board.save({ session });
-    await session.commitTransaction();
+    await board.save();
     res.status(201).json({ status: 'success', data: board });
     logger.info(`Board created: ${board._id}`);
   } catch (err) {
-    await session.abortTransaction();
     logger.error('Board create error:', err.stack);
     res.status(500).json({ status: 'error', message: 'Server error' });
-  } finally {
-    session.endSession();
   }
 });
 
@@ -220,7 +194,10 @@ server.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
 
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err.stack);
+  process.exit(1);
 });
+
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
 });
