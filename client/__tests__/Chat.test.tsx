@@ -6,7 +6,9 @@ vi.mock('socket.io-client', () => {
   const mockSocket = {
     connect: vi.fn(),
     disconnect: vi.fn(),
-    on: vi.fn(),
+    on: vi.fn().mockImplementation((event, callback) => {
+      if (event === 'connect') callback(); 
+    }),
     off: vi.fn(),
     emit: vi.fn(),
   };
