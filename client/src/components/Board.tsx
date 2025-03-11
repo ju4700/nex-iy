@@ -1,8 +1,7 @@
-import { useState, useEffect, ClassAttributes, HTMLAttributes, JSXElementConstructor, LegacyRef, ReactElement, ReactNode, ReactPortal } from 'react';
+import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { io, Socket } from 'socket.io-client';
 import { Task } from '../types';
-import { JSX } from 'react/jsx-runtime';
 
 const socket: Socket = io(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}`, {
   reconnection: true,
@@ -51,7 +50,10 @@ const Board = (): JSX.Element => {
     const [movedTask] = updatedTasks.splice(sourceIndex, 1);
     
     // Update the task status
-    movedTask.status = result.destination.droppableId;
+    const newStatus = result.destination.droppableId;
+    if (newStatus === 'todo' || newStatus === 'in-progress' || newStatus === 'done') {
+      movedTask.status = newStatus;
+    }
     
     // Insert at new position
     updatedTasks.splice(destinationIndex, 0, movedTask);
@@ -126,16 +128,16 @@ const Board = (): JSX.Element => {
         <div style={styles.board}>
           {['todo', 'in-progress', 'done'].map((status) => (
             <Droppable droppableId={status} key={status}>
-              {(provided: { droppableProps: JSX.IntrinsicAttributes & ClassAttributes<HTMLDivElement> & HTMLAttributes<HTMLDivElement>; innerRef: LegacyRef<HTMLDivElement> | undefined; placeholder: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} style={styles.column}>
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef as React.RefObject<HTMLDivElement>} style={styles.column}>
                   <h3>{status.replace('-', ' ').toUpperCase()}</h3>
                   {tasks
                     .filter((task) => task.status === status)
                     .map((task, index) => (
                       <Draggable key={task._id} draggableId={task._id} index={index}>
-                        {(provided: { innerRef: LegacyRef<HTMLDivElement> | undefined; draggableProps: JSX.IntrinsicAttributes & ClassAttributes<HTMLDivElement> & HTMLAttributes<HTMLDivElement>; dragHandleProps: JSX.IntrinsicAttributes & ClassAttributes<HTMLDivElement> & HTMLAttributes<HTMLDivElement>; }) => (
+                        {(provided) => (
                           <div
-                            ref={provided.innerRef}
+                            ref={provided.innerRef as React.RefObject<HTMLDivElement>}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             style={{ ...styles.task, ...provided.draggableProps.style }}
