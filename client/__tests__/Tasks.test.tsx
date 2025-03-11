@@ -62,7 +62,7 @@ describe('Tasks Component', () => {
     const input = screen.getByLabelText(/Filter tasks/i);
     
     // Reset fetch mock to track the next call
-    global.fetch.mockClear();
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
     
     await act(async () => {
       fireEvent.change(input, { target: { value: 'test' } });
