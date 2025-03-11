@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import connectDB from './config.js';
 import logger from './logger.js';
 import helmet from 'helmet';
+import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 
