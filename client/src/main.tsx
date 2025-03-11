@@ -1,10 +1,35 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import Chat from '@components/Chat';
+import Board from '@components/Board';
+import Tasks from '@components/Tasks';
+import VideoCall from '@components/VideoCall';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+const styles = {
+  app: { fontFamily: 'Arial, sans-serif', padding: '20px' },
+  section: { marginBottom: '40px' },
+} as const;
+
+const App = () => (
+  <div style={styles.app}>
+    <div style={styles.section}>
+      <Chat />
+    </div>
+    <div style={styles.section}>
+      <Board />
+    </div>
+    <div style={styles.section}>
+      <Tasks />
+    </div>
+    <div style={styles.section}>
+      <VideoCall />
+    </div>
+  </div>
+);
+
+const rootElement = document.getElementById('root')!;
+createRoot(rootElement).render(
+  <StrictMode>
     <App />
-  </React.StrictMode>
+  </StrictMode>
 );
