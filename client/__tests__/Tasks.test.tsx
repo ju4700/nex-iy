@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import Tasks from '../src/components/Tasks';
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 
 global.fetch = vi.fn(() =>
@@ -25,6 +25,10 @@ global.fetch = vi.fn(() =>
 );
 
 describe('Tasks Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     act(() => {
       render(<Tasks />);
@@ -37,7 +41,10 @@ describe('Tasks Component', () => {
       render(<Tasks />);
     });
     await waitFor(() =>
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/tasks?page=1&limit=5&filter=', expect.any(Object))
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:5000/api/tasks?page=1&limit=5&filter=&sort=asc',
+        expect.any(Object)
+      )
     );
   });
 
@@ -57,9 +64,6 @@ describe('Tasks Component', () => {
       render(<Tasks />);
     });
     const sortButton = screen.getByLabelText(/Sort by date/i);
-    act(() => {
-      fireEvent.click(sortButton);
-    });
     expect(sortButton).toHaveTextContent('Sort ↑');
     act(() => {
       fireEvent.click(sortButton);

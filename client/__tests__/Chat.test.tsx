@@ -2,92 +2,115 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Chat from '../src/components/Chat';
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
+// Mock scrollIntoView which isn't implemented in JSDOM
+Element.prototype.scrollIntoView = vi.fn();
+
+// Mock socket.io-client with a factory pattern to avoid hoisting issues
 vi.mock('socket.io-client', () => {
   const mockSocket = {
     connect: vi.fn(),
     disconnect: vi.fn(),
-    on: vi.fn().mockImplementation((event, callback) => {
-      if (event === 'connect') callback();
-    }),
+    on: vi.fn(),
     off: vi.fn(),
     emit: vi.fn(),
     connected: true,
   };
+  
   return {
-    default: vi.fn(() => mockSocket),
     io: vi.fn(() => mockSocket),
+    __getMockSocket: () => mockSocket // Expose a way to get the socket reference
   };
 });
 
+// Get a reference to the mocked socket after mocking
+const ioModule = await import('socket.io-client');
+const mockSocket = (ioModule as any).__getMockSocket();
+
+// Mock global fetch
 global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({ data: [] }),
-    headers: new Headers(),
-    redirected: false,
     status: 200,
-    statusText: 'OK',
-    type: 'basic',
-    url: '',
-    clone: () => ({}),
-    body: null,
-    bodyUsed: false,
-    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-    blob: () => Promise.resolve(new Blob()),
-    formData: () => Promise.resolve(new FormData()),
-    text: () => Promise.resolve(''),
   } as Response)
 );
 
 describe('Chat Component', () => {
-  it('renders without crashing', () => {
-    act(() => {
+  beforeEach(() => {
+    // Reset all mocks before each test
+    vi.clearAllMocks();
+    mockSocket.connected = true;
+  });
+
+  it('renders without crashing', async () => {
+    await act(async () => {
       render(<Chat />);
+      await Promise.resolve();
     });
     expect(screen.getByText('Team Chat')).toBeInTheDocument();
   });
 
-  it('disables input when disconnected', () => {
-    const mockSocket = require('socket.io-client').default();
-    vi.spyOn(mockSocket, 'connected', 'get').mockReturnValue(false);
-    act(() => {
+  it('disables input when disconnected', async () => {
+    mockSocket.connected = false;
+    await act(async () => {
       render(<Chat />);
+      await Promise.resolve();
     });
     const input = screen.getByLabelText(/Enter your message/i);
     expect(input).toBeDisabled();
   });
 
   it('fetches messages on mount', async () => {
-    act(() => {
+    await act(async () => {
       render(<Chat />);
+      await Promise.resolve();
     });
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/messages'));
+    
+    expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/messages');
   });
 
-  it('sends a message on button click', () => {
-    act(() => {
+  it('sends a message on button click', async () => {
+    await act(async () => {
       render(<Chat />);
+      await Promise.resolve();
     });
+    
     const input = screen.getByLabelText(/Enter your message/i);
     const button = screen.getByText('Send');
-    act(() => {
+    
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.click(button);
+      await Promise.resolve();
     });
+    
     expect(input).toHaveValue('');
+    expect(mockSocket.emit).toHaveBeenCalledWith('send-message', {
+      text: 'Hello',
+      user: 'User',
+    });
   });
 
-  it('sends a message on Enter key', () => {
-    act(() => {
+  it('sends a message on Enter key', async () => {
+    await act(async () => {
       render(<Chat />);
+      await Promise.resolve();
     });
+    
     const input = screen.getByLabelText(/Enter your message/i);
-    act(() => {
+    
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'Hello' } });
       fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+      await Promise.resolve();
     });
+    
     expect(input).toHaveValue('');
+    expect(mockSocket.emit).toHaveBeenCalledWith('send-message', {
+      text: 'Hello',
+      user: 'User',
+    });
   });
 });
