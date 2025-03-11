@@ -13,7 +13,10 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    // Removed noEmit: true
+    
+    /* Replace noEmit with emitDeclarationOnly */
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
 
     /* Linting */
     "strict": true,
