@@ -3,6 +3,7 @@
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
