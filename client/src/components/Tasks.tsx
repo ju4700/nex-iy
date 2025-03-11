@@ -1,5 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Task } from '../types';
+import { useState, useEffect, useCallback } from 'react';
+import { debounce } from '../utils/debounce';
+
+interface Task {
+  _id: string;
+  title: string;
+  status: 'open' | 'in-progress' | 'done';
+  createdAt: string;
+}
 
 interface TasksResponse {
   data: Task[];
@@ -10,20 +17,21 @@ interface TasksResponse {
 
 const Tasks = (): JSX.Element => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(5);
-  const [total, setTotal] = useState<number>(0);
   const [filter, setFilter] = useState<string>('');
-  const [sortAsc, setSortAsc] = useState<boolean>(true);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState<number>(0);
+  const ITEMS_PER_PAGE = 5;
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const sortDirection = sortAsc ? 'asc' : 'desc';
       const response = await fetch(
-        `http://localhost:5000/api/tasks?page=${page}&limit=${limit}&filter=${filter}&sort=${sortDirection}`,
+        `http://localhost:5000/api/tasks?page=${currentPage}&limit=${ITEMS_PER_PAGE}&filter=${filter}&sort=${sortOrder}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -32,40 +40,51 @@ const Tasks = (): JSX.Element => {
       );
       
       if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
+        throw new Error(`Failed to fetch tasks: ${response.status}`);
       }
       
       const result = await response.json();
-      const taskData: TasksResponse = result.data;
-      
-      setTasks(taskData.data);
-      setTotal(taskData.total);
-      setPage(taskData.page);
-      setLoading(false);
-    } catch (err) {
-      setError('Error fetching tasks');
-      setLoading(false);
+      setTasks(result.data.data || []);
+      setTotal(result.data.total);
+      setTotalPages(Math.ceil(result.data.total / ITEMS_PER_PAGE));
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+      setError('Failed to load tasks. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, filter, sortOrder]);
+
+  // Debounced version of fetchTasks for filtering
+  const debouncedFetchTasks = useCallback(
+    debounce(() => {
+      fetchTasks();
+    }, 300),
+    [fetchTasks]
+  );
+
+  // Handle filter change with debounce
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFilter = e.target.value;
+    setFilter(newFilter);
+    setCurrentPage(1); // Reset to first page on filter change
+    debouncedFetchTasks();
+  };
+
+  const toggleSortOrder = () => {
+    const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newOrder);
+  };
+
+  const goToPage = (pageNum: number) => {
+    if (pageNum >= 1 && pageNum <= totalPages) {
+      setCurrentPage(pageNum);
     }
   };
 
   useEffect(() => {
     fetchTasks();
-  }, [page, filter, sortAsc]);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-    setPage(1); // Reset to first page when filtering
-  };
-
-  const toggleSortOrder = () => {
-    setSortAsc(!sortAsc);
-  };
-
-  const goToPage = (newPage: number) => {
-    if (newPage > 0 && newPage <= Math.ceil(total / limit)) {
-      setPage(newPage);
-    }
-  };
+  }, [fetchTasks, sortOrder, currentPage]);
 
   const styles = {
     container: { margin: '20px', maxWidth: '800px' },
@@ -142,11 +161,11 @@ const Tasks = (): JSX.Element => {
           style={styles.sortButton}
           aria-label="Sort by date"
         >
-          Sort {sortAsc ? '↑' : '↓'}
+          Sort {sortOrder === 'asc' ? '↑' : '↓'}
         </button>
       </div>
       
-      {loading ? (
+      {isLoading ? (
         <div style={styles.loading}>Loading tasks...</div>
       ) : error ? (
         <div style={styles.error}>{error}</div>
@@ -167,35 +186,51 @@ const Tasks = (): JSX.Element => {
           
           <div style={styles.pagination}>
             <button
-              onClick={() => goToPage(page - 1)}
-              disabled={page === 1}
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
               style={{
                 ...styles.pageButton,
-                opacity: page === 1 ? 0.5 : 1,
+                opacity: currentPage === 1 ? 0.5 : 1,
               }}
             >
               Previous
             </button>
             
-            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => goToPage(pageNum)}
-                style={{
-                  ...styles.pageButton,
-                  ...(pageNum === page ? styles.activePageButton : {}),
-                }}
-              >
-                {pageNum}
-              </button>
-            ))}
+            {totalPages > 0 && (
+              <>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  // Show pages around current page if there are many pages
+                  let pageNum = i + 1;
+                  if (totalPages > 5) {
+                    if (currentPage > 3) {
+                      pageNum = currentPage - 3 + i;
+                    }
+                    if (pageNum > totalPages - 4) {
+                      pageNum = totalPages - 4 + i;
+                    }
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      style={{
+                        ...styles.pageButton,
+                        ...(pageNum === currentPage ? styles.activePageButton : {}),
+                      }}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </>
+            )}
             
             <button
-              onClick={() => goToPage(page + 1)}
-              disabled={page >= Math.ceil(total / limit)}
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage >= totalPages}
               style={{
                 ...styles.pageButton,
-                opacity: page >= Math.ceil(total / limit) ? 0.5 : 1,
+                opacity: currentPage >= totalPages ? 0.5 : 1,
               }}
             >
               Next
