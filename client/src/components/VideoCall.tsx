@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import Peer from 'simple-peer';
+import SimplePeer from 'simple-peer';
 
 interface PeerSignal {
   type: string;
@@ -17,17 +17,17 @@ const socket: Socket = io(`${import.meta.env.VITE_API_URL || 'http://localhost:5
 const VideoCall = (): JSX.Element => {
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const [remotePeerIds, setRemotePeerIds] = useState<string[]>([]);
-  const [peers, setPeers] = useState<Record<string, Peer.Instance>>({});
+  const [peers, setPeers] = useState<Record<string, SimplePeer>>({});
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
   const myVideo = useRef<HTMLVideoElement>(null);
   const remoteVideos = useRef<Record<string, HTMLVideoElement>>({});
-  const peersRef = useRef<Record<string, Peer.Instance>>({}); // Use ref to avoid dependency issues
+  const peersRef = useRef<Record<string, SimplePeer>>({});
   
   // Create peer as a useCallback to avoid recreation on each render
-  const createPeer = useCallback((target: string, caller: string, stream: MediaStream | null): Peer.Instance => {
-    const peer = new Peer({
+  const createPeer = useCallback((target: string, caller: string, stream: MediaStream | null): SimplePeer => {
+    const peer = new SimplePeer({
       initiator: true,
       trickle: false,
       stream: stream || undefined,
@@ -70,7 +70,7 @@ const VideoCall = (): JSX.Element => {
     
     socket.on('user-joined', (userId: string) => {
       // Only create peer if we have a stream
-      if (myStream) {
+      if (myStream && socket.id) {
         const peer = createPeer(userId, socket.id, myStream);
         
         // Store in both state and ref
@@ -113,9 +113,9 @@ const VideoCall = (): JSX.Element => {
     
     socket.on('user-already-connected', (userIds: string[]) => {
       // Only create peers if we have a stream
-      if (myStream) {
+      if (myStream && socket.id) {
         userIds.forEach(userId => {
-          const peer = createPeer(userId, socket.id, myStream);
+          const peer = createPeer(userId, socket.id!, myStream);
           
           // Store in both state and ref
           setPeers(prevPeers => ({
