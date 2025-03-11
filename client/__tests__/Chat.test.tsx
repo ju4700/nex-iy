@@ -10,7 +10,9 @@ vi.mock('socket.io-client', () => {
     off: vi.fn(),
     emit: vi.fn(),
   };
-  return vi.fn(() => mockSocket);
+  return {
+    default: vi.fn(() => mockSocket),
+  };
 });
 
 global.fetch = vi.fn(() =>
