@@ -1,27 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ESNext",                   
-    "lib": ["DOM", "DOM.Iterable", "ESNext"], 
-    "module": "ESNext",                   
-    "moduleResolution": "Bundler",        
-    "allowJs": true,                      
-    "jsx": "react-jsx",                  
-    "strict": true,                       
-    "esModuleInterop": true,              
-    "skipLibCheck": true,                 
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true, 
-    "noEmit": true,                       
-    "resolveJsonModule": true,            
-    "isolatedModules": true,              
-    "baseUrl": ".",                       
-    "paths": {                            
+    "target": "ESNext",                   // Use the latest JavaScript features (Vite handles ESNext well)
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // Include DOM and ESNext libraries for React and modern JS
+    "module": "ESNext",                   // Use ES modules (matches Vite's setup)
+    "moduleResolution": "Bundler",        // Use bundler resolution (recommended for Vite)
+    "allowJs": true,                      // Allow JavaScript files (useful if you have mixed JS/TS)
+    "jsx": "react-jsx",                   // Use React's JSX transform
+    "strict": true,                       // Enable strict type-checking
+    "esModuleInterop": true,              // Enable interop with CommonJS modules
+    "skipLibCheck": true,                 // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+    "noEmit": true,                       // Vite handles the build, so TypeScript doesn't emit files
+    "resolveJsonModule": true,            // Allow importing JSON files
+    "isolatedModules": true,              // Ensure compatibility with Vite's ES module requirements
+    "baseUrl": ".",                       // Base directory for resolving non-relative module names
+    "paths": {                            // Path aliases matching vite.config.ts
       "@components/*": ["src/components/*"],
       "@utils/*": ["src/utils/*"],
       "@types/*": ["src/types/*"]
     },
-    "types": ["vite/client", "vitest/globals"] 
+    "types": ["vite/client", "vitest/globals"] // Include Vite and Vitest types for better type support
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts"], 
-  "exclude": ["node_modules", "dist"]  
+  "include": ["src", "vite.config.ts", "vitest.config.ts"], // Include source files, Vite config, and Vitest config
+  "exclude": ["node_modules", "dist"]     // Exclude node_modules and dist folders
 }
