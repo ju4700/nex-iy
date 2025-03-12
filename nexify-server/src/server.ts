@@ -1,6 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -12,7 +13,9 @@ import messageRoutes from './routes/messages';
 import taskRoutes from './routes/tasks';
 import fileRoutes from './routes/files';
 import logger from './logger';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import sanitize from 'sanitize-html';
+import redis from './utils/redis';
 
 dotenv.config();
 
@@ -23,15 +26,46 @@ const io = new Server(server, {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT'],
   },
+  adapter: createAdapter(redis, redis.duplicate()), // Enable Redis adapter for Socket.IO
 });
 
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(helmet());
 app.use(express.json());
+
+// Input sanitization middleware
+app.use((req, res, next) => {
+  const sanitizeObject = (obj: any) => {
+    for (const key in obj) {
+      if (typeof obj[key] === 'string') {
+        obj[key] = sanitize(obj[key], {
+          allowedTags: [],
+          allowedAttributes: {},
+        });
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        sanitizeObject(obj[key]);
+      }
+    }
+  };
+
+  sanitizeObject(req.body);
+  sanitizeObject(req.query);
+  sanitizeObject(req.params);
+  next();
+});
+
+// Rate limiting for authentication routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limit to 50 requests per window
+});
+app.use('/api/auth', authLimiter);
+
+// General rate limiting
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 100, // Limit to 100 requests per window
   })
 );
 
@@ -41,7 +75,7 @@ app.use('/api/messages', authenticateToken, messageRoutes);
 app.use('/api/tasks', authenticateToken, taskRoutes);
 app.use('/api/files', authenticateToken, fileRoutes);
 
-// Serve uploaded files
+// Serve uploaded files (temporary, will switch to S3)
 app.use('/uploads', express.static('uploads'));
 
 function authenticateToken(req: any, res: any, next: any) {
@@ -79,13 +113,16 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('send-message', async ({ text, userId, teamId }) => {
     try {
+      const sanitizedText = sanitize(text, { allowedTags: [], allowedAttributes: {} });
       const newMessage = new (mongoose.model('Message'))({
-        text,
+        text: sanitizedText,
         user: userId,
         team: teamId,
       });
       await newMessage.save();
       io.to(teamId).emit('new-message', newMessage);
+      // Invalidate cache
+      await redis.del(`messages:${teamId}`);
       logger.info('New message sent', { messageId: newMessage._id, teamId });
     } catch (error) {
       logger.error('Error sending message', { error });

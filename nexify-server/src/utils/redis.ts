@@ -1,16 +1,18 @@
-import { createClient } from 'redis';
-import { config } from '../config';
+import Redis from 'ioredis';
 import logger from '../logger';
 
-const redisClient = createClient({
-  url: config.redisUrl,
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: Number(process.env.REDIS_PORT) || 6379,
+  password: process.env.REDIS_PASSWORD,
 });
 
-redisClient.on('error', (err) => logger.error('Redis Client Error', { error: err.message }));
-redisClient.on('connect', () => logger.info('Connected to Redis'));
+redis.on('connect', () => {
+  logger.info('Connected to Redis');
+});
 
-export const connectRedis = async () => {
-  await redisClient.connect();
-};
+redis.on('error', (err) => {
+  logger.error('Redis connection error', { error: err });
+});
 
-export default redisClient;
+export default redis;
