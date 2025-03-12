@@ -1,11 +1,10 @@
 {
   "name": "nexify-server",
   "version": "0.1.0",
-  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node -r tsconfig-paths/register src/server.ts'",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node src/server.ts'",
     "build": "tsc",
     "test": "vitest run",
     "lint": "eslint . --ext .ts,.js --fix",
