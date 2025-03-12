@@ -1,7 +1,9 @@
-import mongoose, { Schema } from 'mongoose';
-import { Task } from '../types';
+import mongoose, { Schema, Document } from 'mongoose';
+import { Task as ITask } from '../types';
 
-const taskSchema = new Schema<Task>({
+interface TaskDocument extends Document, Omit<ITask, '_id'> {}
+
+const taskSchema = new Schema({
   title: { type: String, required: true },
   status: { type: String, enum: ['todo', 'in-progress', 'done'], default: 'todo' },
   assignedTo: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -9,4 +11,4 @@ const taskSchema = new Schema<Task>({
   createdAt: { type: Date, default: Date.now },
 });
 
-export const TaskModel = mongoose.model<Task>('Task', taskSchema);
+export const TaskModel = mongoose.model<TaskDocument>('Task', taskSchema);

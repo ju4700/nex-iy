@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { File } from '../types';
+import { File as IFile } from '../types';
 
-const fileSchema = new Schema<File & Document>({
+interface FileDocument extends Document, Omit<IFile, '_id'> {}
+
+const fileSchema = new Schema({
   name: { type: String, required: true },
   url: { type: String, required: true },
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -9,4 +11,4 @@ const fileSchema = new Schema<File & Document>({
   createdAt: { type: Date, default: Date.now },
 });
 
-export const FileModel = mongoose.model<File & Document>('File', fileSchema);
+export const FileModel = mongoose.model<FileDocument>('File', fileSchema);
