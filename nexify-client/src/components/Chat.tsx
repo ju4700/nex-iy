@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useRef } from 'react';
-import { styled } from '@emotion/styled';
+import styled from '@emotion/styled';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@utils/auth';
 

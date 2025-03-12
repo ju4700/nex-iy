@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { styled } from '@emotion/styled';
+import styled from '@emotion/styled';
 import axios from 'axios';
 import { useAuth } from '@utils/auth';
 

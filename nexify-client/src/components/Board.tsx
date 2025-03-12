@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { styled } from '@emotion/styled';
+import styled from '@emotion/styled';
 import { useAuth } from '@utils/auth';
 import axios from 'axios';
 

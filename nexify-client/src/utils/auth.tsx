@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('selectedTeam');
-    axios.defaults.headers.Authorization = undefined;
+    delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);
     setSelectedTeam(null);
