@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
-import Chat from '@components/Chat';
-import Board from '@components/Board';
-import Tasks from '@components/Tasks';
-import VideoCall from '@components/VideoCall';
-import ErrorBoundary from '@components/ErrorBoundary';
+import Chat from './components/Chat';
+import Board from './components/Board';
+import Tasks from './components/Tasks';
+import VideoCall from './components/VideoCall';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const App: FC = () => {
   const [activeTab, setActiveTab] = useState<'chat' | 'board' | 'tasks' | 'call'>('chat');
