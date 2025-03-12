@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts --exec 'ts-node --esm'",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node -r tsconfig-paths/register src/server.ts'",
     "build": "tsc",
     "test": "vitest run",
     "lint": "eslint . --ext .ts,.js --fix",
