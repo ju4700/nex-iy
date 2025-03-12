@@ -1,11 +1,14 @@
 export interface User {
-    _id: string;
-    username: string;
-    email: string;
-    password: string; // Will be hashed
-    teams: string[]; // Array of team IDs
-    createdAt: Date;
-  }
+  username: string;
+  email: string;
+  password: string;
+  teams?: string[];
+  createdAt?: Date;
+  isVerified?: boolean;
+  verificationToken?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+}
   
   export interface Team {
     _id: string;
