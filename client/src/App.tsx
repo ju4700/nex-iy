@@ -2,11 +2,12 @@ import { FC, useState } from 'react';
 import Chat from './components/Chat';
 import Board from './components/Board';
 import Tasks from './components/Tasks';
-import VideoCall from './components/VideoCall';
+// import VideoCall from './components/VideoCall';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const App: FC = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'board' | 'tasks' | 'call'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'board' | 'tasks'>('chat');
+  // Remove 'call' from the type
 
   const styles = {
     container: { 
@@ -78,22 +79,12 @@ const App: FC = () => {
           >
             Tasks
           </button>
-          <button 
-            onClick={() => setActiveTab('call')} 
-            style={{
-              ...styles.tab,
-              ...(activeTab === 'call' ? styles.activeTab : {})
-            }}
-          >
-            Video Call
-          </button>
         </div>
         
         <div style={styles.content}>
           {activeTab === 'chat' && <Chat />}
           {activeTab === 'board' && <Board />}
           {activeTab === 'tasks' && <Tasks />}
-          {activeTab === 'call' && <VideoCall />}
         </div>
       </div>
     </ErrorBoundary>

@@ -25,14 +25,21 @@ export default defineConfig({
       'react',
       'react-dom',
       'socket.io-client',
+      'simple-peer', // Add simple-peer to ensure proper bundling
     ],
-    exclude: ['simple-peer'],
   },
   server: {
     port: parseInt(process.env.VITE_PORT || '3000'),
     open: true,
     host: 'localhost',
     hmr: { overlay: true },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     outDir: 'dist',

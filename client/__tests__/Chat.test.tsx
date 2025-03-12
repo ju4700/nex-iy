@@ -20,11 +20,10 @@ vi.mock('socket.io-client', () => {
   
   return {
     io: vi.fn(() => mockSocket),
-    __getMockSocket: () => mockSocket // Expose a way to get the socket reference
+    __getMockSocket: () => mockSocket 
   };
 });
 
-// Get a reference to the mocked socket after mocking
 const ioModule = await import('socket.io-client');
 const mockSocket = (ioModule as any).__getMockSocket();
 
