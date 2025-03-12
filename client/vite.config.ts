@@ -11,6 +11,23 @@ export default defineConfig({
       '@types': resolve(__dirname, 'src/types'),
     },
   },
+  define: {
+    global: 'window',
+    'process.env': {},
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+    },
+    include: [
+      'react',
+      'react-dom',
+      'socket.io-client',
+    ],
+    exclude: ['simple-peer'],
+  },
   server: {
     port: parseInt(process.env.VITE_PORT || '3000'),
     open: true,
@@ -27,6 +44,7 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             if (id.includes('react')) return 'react-vendor';
             if (id.includes('socket.io-client')) return 'socket-vendor';
+            if (id.includes('simple-peer')) return 'webrtc-vendor';
             return 'vendor';
           }
         },
