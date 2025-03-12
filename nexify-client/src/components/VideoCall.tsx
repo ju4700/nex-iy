@@ -1,8 +1,18 @@
-import { FC, useState, useEffect, useRef, useCallback } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../utils/auth';
-import SimplePeer, { Instance } from 'simple-peer';
+import Peer, { MediaConnection } from 'peerjs';
+
+// Types for socket events
+interface UserJoinedData {
+  userId: string;
+  peerId: string;
+}
+
+interface UserLeftData {
+  userId: string;
+}
 
 const VideoContainer = styled.div`
   margin: 20px;
@@ -82,124 +92,172 @@ const Error = styled.div`
 const VideoCall: FC = () => {
   const { user, token, selectedTeam } = useAuth();
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
-  const [peers, setPeers] = useState<Record<string, Instance>>({});
+  const [peers, setPeers] = useState<Record<string, MediaConnection>>({});
   const [socket, setSocket] = useState<Socket | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [peer, setPeer] = useState<Peer | null>(null);
+  const [remotePeers, setRemotePeers] = useState<Record<string, string>>({});
+  
   const myVideo = useRef<HTMLVideoElement>(null);
   const remoteVideos = useRef<Record<string, HTMLVideoElement>>({});
-  const peersRef = useRef<Record<string, Instance>>({});
-
-  const createPeer = useCallback((userId: string, callerId: string, stream: MediaStream): Instance => {
-    const peer = new SimplePeer({
-      initiator: true,
-      trickle: false,
-      stream,
-    });
-
-    peer.on('signal', (signal) => {
-      if (socket) {
-        socket.emit('signal', { signal, to: userId, teamId: selectedTeam });
-      }
-    });
-
-    peer.on('stream', (remoteStream) => {
-      if (remoteVideos.current[userId]) {
-        remoteVideos.current[userId].srcObject = remoteStream;
-      }
-    });
-
-    peer.on('error', (err) => {
-      setError(`Peer connection error: ${err.message}`);
-    });
-
-    return peer;
-  }, [socket, selectedTeam]);
-
+  
+  // Initialize socket connection
   useEffect(() => {
-    if (user && selectedTeam) {
+    if (user && selectedTeam && token) {
       const newSocket = io('http://localhost:5000', {
         auth: { token },
       });
+      
       setSocket(newSocket);
-
-      newSocket.on('connect', () => {
-        newSocket.emit('join-video-call', { userId: user.id, teamId: selectedTeam, token });
-      });
-
-      newSocket.on('user-joined', ({ userId }) => {
-        if (myStream && userId !== user.id) {
-          const peer = createPeer(userId, user.id, myStream);
-          setPeers((prev) => ({ ...prev, [userId]: peer }));
-          peersRef.current[userId] = peer;
-        }
-      });
-
-      newSocket.on('user-left', ({ userId }) => {
-        if (peersRef.current[userId]) {
-          peersRef.current[userId].destroy();
-          delete peersRef.current[userId];
-          setPeers((prev) => {
-            const newPeers = { ...prev };
-            delete newPeers[userId];
-            return newPeers;
-          });
-        }
-      });
-
-      newSocket.on('signal', ({ signal, from }) => {
-        if (!peersRef.current[from]) {
-          const peer = new SimplePeer({
-            initiator: false,
-            trickle: false,
-            stream: myStream,
-          });
-          peer.on('signal', (data) => {
-            newSocket.emit('signal', { signal: data, to: from, teamId: selectedTeam });
-          });
-          peer.on('stream', (remoteStream) => {
-            if (remoteVideos.current[from]) {
-              remoteVideos.current[from].srcObject = remoteStream;
-            }
-          });
-          peer.signal(signal);
-          setPeers((prev) => ({ ...prev, [from]: peer }));
-          peersRef.current[from] = peer;
-        } else {
-          peersRef.current[from].signal(signal);
-        }
-      });
-
+      
       return () => {
         newSocket.disconnect();
       };
     }
-  }, [user, selectedTeam, token, myStream, createPeer]);
-
+  }, [user, selectedTeam, token]);
+  
+  // Handle socket events
+  useEffect(() => {
+    if (!socket) return;
+    
+    socket.on('connect', () => {
+      console.log('Socket connected');
+    });
+    
+    socket.on('user-joined', ({ userId, peerId }: UserJoinedData) => {
+      console.log('User joined:', userId, peerId);
+      setRemotePeers(prev => ({ ...prev, [userId]: peerId }));
+      
+      // Call the new peer if we have a stream
+      if (peer && myStream && userId !== user?.id) {
+        const call = peer.call(peerId, myStream);
+        handleNewCall(call, userId);
+      }
+    });
+    
+    socket.on('user-left', ({ userId }: UserLeftData) => {
+      console.log('User left:', userId);
+      // Remove the peer from our list
+      setRemotePeers(prev => {
+        const newPeers = { ...prev };
+        delete newPeers[userId];
+        return newPeers;
+      });
+      
+      // Close the connection if exists
+      if (peers[userId]) {
+        peers[userId].close();
+        setPeers(prev => {
+          const newPeers = { ...prev };
+          delete newPeers[userId];
+          return newPeers;
+        });
+      }
+    });
+    
+    return () => {
+      socket.off('connect');
+      socket.off('user-joined');
+      socket.off('user-left');
+    };
+  }, [socket, peer, myStream, user, peers]);
+  
+  // Handle new calls
+  const handleNewCall = (call: MediaConnection, userId: string) => {
+    // Answer the call
+    call.on('stream', remoteStream => {
+      console.log('Received stream from', userId);
+      if (remoteVideos.current[userId]) {
+        remoteVideos.current[userId].srcObject = remoteStream;
+      }
+    });
+    
+    call.on('close', () => {
+      console.log('Call closed with', userId);
+      setPeers(prev => {
+        const newPeers = { ...prev };
+        delete newPeers[userId];
+        return newPeers;
+      });
+    });
+    
+    call.on('error', err => {
+      setError(`Call error with ${userId}: ${err.message}`);
+    });
+    
+    setPeers(prev => ({ ...prev, [userId]: call }));
+  };
+  
   const startVideoCall = async () => {
     try {
+      // Get user media
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setMyStream(stream);
+      
       if (myVideo.current) {
         myVideo.current.srcObject = stream;
       }
+      
+      // Create peer
+      const newPeer = new Peer();
+      
+      newPeer.on('open', (peerId) => {
+        console.log('My peer ID is:', peerId);
+        setPeer(newPeer);
+        
+        // Join video call room
+        if (socket && user && selectedTeam) {
+          socket.emit('join-video-call', { 
+            userId: user.id, 
+            teamId: selectedTeam, 
+            peerId,
+            token 
+          });
+        }
+      });
+      
+      newPeer.on('call', (call) => {
+        console.log('Incoming call');
+        call.answer(stream);
+        
+        // Get the userId from remotePeers (reverse lookup)
+        const userId = Object.entries(remotePeers).find(([_, pId]) => pId === call.peer)?.[0];
+        if (userId) {
+          handleNewCall(call, userId);
+        }
+      });
+      
+      newPeer.on('error', (err) => {
+        setError(`PeerJS error: ${err.message}`);
+      });
+      
       setError(null);
-    } catch (err: any) {
-      setError(`Failed to access media devices: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Unknown error';
+      setError(`Failed to access media devices: ${errorMessage}`);
     }
   };
-
+  
   const endVideoCall = () => {
+    // Stop all media tracks
     if (myStream) {
       myStream.getTracks().forEach((track) => track.stop());
       setMyStream(null);
     }
-    Object.values(peersRef.current).forEach((peer) => peer.destroy());
-    peersRef.current = {};
+    
+    // Close all peer connections
+    if (peer) {
+      peer.destroy();
+      setPeer(null);
+    }
+    
+    // Close all calls
+    Object.values(peers).forEach(call => call.close());
     setPeers({});
   };
-
+  
   if (!selectedTeam) return <div>Select a team to start a video call</div>;
-
+  
   return (
     <VideoContainer>
       <h2>Video Call</h2>
@@ -226,9 +284,13 @@ const VideoCall: FC = () => {
             </div>
           </VideoWrapper>
         )}
-        {Object.keys(peers).map((peerId) => (
-          <VideoWrapper key={peerId}>
-            <Video ref={(el) => { if (el) remoteVideos.current[peerId] = el; }} autoPlay playsInline />
+        {Object.keys(peers).map((userId) => (
+          <VideoWrapper key={userId}>
+            <Video 
+              ref={(el) => { if (el) remoteVideos.current[userId] = el; }} 
+              autoPlay 
+              playsInline 
+            />
             <div style={{ position: 'absolute', bottom: '10px', left: '10px', color: 'white', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>
               Remote User
             </div>
