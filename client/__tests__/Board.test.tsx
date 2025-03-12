@@ -4,7 +4,6 @@ import Board from '../src/components/Board';
 import { vi, describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom';
 
-// Mock the Task type for testing
 vi.mock('../src/types', () => ({
   Task: {
     _id: String,
