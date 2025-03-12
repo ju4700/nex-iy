@@ -1,7 +1,7 @@
 import { FC, useState, useEffect, useRef, useCallback } from 'react';
-import { styled } from '@emotion/styled';
+import styled from '@emotion/styled';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@utils/auth';
+import { useAuth } from '../utils/auth';
 import SimplePeer, { Instance } from 'simple-peer';
 
 const VideoContainer = styled.div`

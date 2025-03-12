@@ -1,14 +1,14 @@
 import { FC, useState } from 'react';
-import { styled } from '@emotion/styled';
-import Chat from '@components/Chat';
-import Board from '@components/Board';
-import Tasks from '@components/Tasks';
-import VideoCall from '@components/VideoCall';
-import Files from '@components/Files';
-import Login from '@components/Login';
-import Register from '@components/Register';
-import Teams from '@components/Teams';
-import { useAuth } from '@utils/auth';
+import styled from '@emotion/styled';
+import Chat from './components/Chat';
+import Board from './components/Board';
+import Tasks from './components/Tasks';
+import VideoCall from './components/VideoCall';
+import Files from './components/Files';
+import Login from './components/Login';
+import Register from './components/Register';
+import Teams from './components/Teams';
+import { useAuth } from './utils/auth';
 
 const Container = styled.div`
   max-width: 1200px;
