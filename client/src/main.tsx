@@ -1,35 +1,41 @@
-import { StrictMode } from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import Chat from '@components/Chat';
-import Board from '@components/Board';
-import Tasks from '@components/Tasks';
-import VideoCall from '@components/VideoCall';
+import App from './App';
+// Import directly with relative path to avoid path resolution issues
+import ErrorBoundary from './components/ErrorBoundary';
 
-const styles = {
-  app: { fontFamily: 'Arial, sans-serif', padding: '20px' },
-  section: { marginBottom: '40px' },
-} as const;
+// Ensure the root element exists before trying to render
+const rootElement = document.getElementById('root');
 
-const App = () => (
-  <div style={styles.app}>
-    <div style={styles.section}>
-      <Chat />
-    </div>
-    <div style={styles.section}>
-      <Board />
-    </div>
-    <div style={styles.section}>
-      <Tasks />
-    </div>
-    <div style={styles.section}>
-      <VideoCall />
-    </div>
-  </div>
-);
-
-const rootElement = document.getElementById('root')!;
-createRoot(rootElement).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+if (!rootElement) {
+  console.error('Failed to find the root element');
+} else {
+  const root = createRoot(rootElement);
+  
+  try {
+    root.render(
+      <StrictMode>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </StrictMode>
+    );
+  } catch (error) {
+    console.error('Failed to render the application:', error);
+    // Fallback rendering in case of critical error
+    root.render(
+      <div style={{ 
+        padding: '20px', 
+        margin: '20px', 
+        fontFamily: 'Arial, sans-serif',
+        color: '#721c24',
+        backgroundColor: '#f8d7da',
+        border: '1px solid #f5c6cb',
+        borderRadius: '4px'
+      }}>
+        <h2>Application Error</h2>
+        <p>The application couldn't be loaded due to an error. Please check the console for details.</p>
+      </div>
+    );
+  }
+}
