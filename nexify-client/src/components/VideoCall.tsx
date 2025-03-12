@@ -4,7 +4,6 @@ import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../utils/auth';
 import Peer, { MediaConnection } from 'peerjs';
 
-// Types for socket events
 interface UserJoinedData {
   userId: string;
   peerId: string;
@@ -101,7 +100,6 @@ const VideoCall: FC = () => {
   const myVideo = useRef<HTMLVideoElement>(null);
   const remoteVideos = useRef<Record<string, HTMLVideoElement>>({});
   
-  // Initialize socket connection
   useEffect(() => {
     if (user && selectedTeam && token) {
       const newSocket = io('http://localhost:5000', {
@@ -116,7 +114,6 @@ const VideoCall: FC = () => {
     }
   }, [user, selectedTeam, token]);
   
-  // Handle socket events
   useEffect(() => {
     if (!socket) return;
     
@@ -128,7 +125,6 @@ const VideoCall: FC = () => {
       console.log('User joined:', userId, peerId);
       setRemotePeers(prev => ({ ...prev, [userId]: peerId }));
       
-      // Call the new peer if we have a stream
       if (peer && myStream && userId !== user?.id) {
         const call = peer.call(peerId, myStream);
         handleNewCall(call, userId);
@@ -137,14 +133,12 @@ const VideoCall: FC = () => {
     
     socket.on('user-left', ({ userId }: UserLeftData) => {
       console.log('User left:', userId);
-      // Remove the peer from our list
       setRemotePeers(prev => {
         const newPeers = { ...prev };
         delete newPeers[userId];
         return newPeers;
       });
       
-      // Close the connection if exists
       if (peers[userId]) {
         peers[userId].close();
         setPeers(prev => {
@@ -162,9 +156,8 @@ const VideoCall: FC = () => {
     };
   }, [socket, peer, myStream, user, peers]);
   
-  // Handle new calls
   const handleNewCall = (call: MediaConnection, userId: string) => {
-    // Answer the call
+    
     call.on('stream', remoteStream => {
       console.log('Received stream from', userId);
       if (remoteVideos.current[userId]) {
@@ -190,7 +183,6 @@ const VideoCall: FC = () => {
   
   const startVideoCall = async () => {
     try {
-      // Get user media
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setMyStream(stream);
       
@@ -198,14 +190,12 @@ const VideoCall: FC = () => {
         myVideo.current.srcObject = stream;
       }
       
-      // Create peer
       const newPeer = new Peer();
       
       newPeer.on('open', (peerId) => {
         console.log('My peer ID is:', peerId);
         setPeer(newPeer);
         
-        // Join video call room
         if (socket && user && selectedTeam) {
           socket.emit('join-video-call', { 
             userId: user.id, 
@@ -220,7 +210,6 @@ const VideoCall: FC = () => {
         console.log('Incoming call');
         call.answer(stream);
         
-        // Get the userId from remotePeers (reverse lookup)
         const userId = Object.entries(remotePeers).find(([_, pId]) => pId === call.peer)?.[0];
         if (userId) {
           handleNewCall(call, userId);
@@ -239,19 +228,16 @@ const VideoCall: FC = () => {
   };
   
   const endVideoCall = () => {
-    // Stop all media tracks
     if (myStream) {
       myStream.getTracks().forEach((track) => track.stop());
       setMyStream(null);
     }
     
-    // Close all peer connections
     if (peer) {
       peer.destroy();
       setPeer(null);
     }
     
-    // Close all calls
     Object.values(peers).forEach(call => call.close());
     setPeers({});
   };
