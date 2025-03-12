@@ -8,9 +8,9 @@ const userSchema = new Schema<User & Document>({
   teams: [{ type: Schema.Types.ObjectId, ref: 'Team' }],
   createdAt: { type: Date, default: Date.now },
   isVerified: { type: Boolean, default: false },
-  verificationToken: { type: String }, 
-  resetPasswordToken: { type: String }, 
-  resetPasswordExpires: { type: Date }, 
+  verificationToken: { type: String },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Number },
 });
 
-export const UserModel = mongoose.model<User>('User', userSchema);
+export const UserModel = mongoose.model<User & Document>('User', userSchema);

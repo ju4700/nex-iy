@@ -1,3 +1,15 @@
+import mongoose, { Document } from 'mongoose';
+
+export interface UserDocument extends Document {
+  username: string;
+  email: string;
+  password: string;
+  isVerified: boolean;
+  verificationToken?: string;
+  resetToken?: string;
+  resetTokenExpiry?: number;
+}
+
 export interface User {
   username: string;
   email: string;
@@ -6,8 +18,8 @@ export interface User {
   createdAt?: Date;
   isVerified?: boolean;
   verificationToken?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+  resetToken?: string;
+  resetTokenExpiry?: number;
 }
   
   export interface Team {
