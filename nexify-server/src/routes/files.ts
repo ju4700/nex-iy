@@ -1,25 +1,41 @@
-import express, { Router } from 'express';
+import express, { Router, Request, Response } from 'express';
 import { FileModel } from '../models/file';
 import { body, validationResult } from 'express-validator';
 import logger from '../logger';
 import { v4 as uuidv4 } from 'uuid';
-import multer from 'multer';
+
+const multer = require('multer');
 import path from 'path';
 
-const router: Router = express.Router();
-// Define types
-interface MulterFile {
-    originalname: string;
-    // Other properties omitted for brevity
+
+type MulterFile = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+};
+
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    [key: string]: any;
+  };
+  file?: MulterFile;
 }
 
 type FileCallback = (error: Error | null, filename: string) => void;
 
+const router: Router = express.Router();
+
 const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: (req: express.Request, file: MulterFile, cb: FileCallback) => {
-        cb(null, `${uuidv4()}${path.extname(file.originalname)}`);
-    },
+  destination: './uploads/',
+  filename: (req: Request, file: MulterFile, cb: FileCallback) => {
+    cb(null, `${uuidv4()}${path.extname(file.originalname)}`);
+  },
 });
 const upload = multer({ storage });
 
@@ -29,7 +45,7 @@ router.post(
   [
     body('teamId').notEmpty().withMessage('Team ID is required'),
   ],
-  async (req, res) => {
+  async (req: AuthRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -37,7 +53,7 @@ router.post(
 
     try {
       const { teamId } = req.params;
-      const userId = req.user?.id; // Assuming middleware sets req.user from JWT
+      const userId = req.user?.id; 
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
@@ -62,7 +78,7 @@ router.post(
   }
 );
 
-router.get('/:teamId', async (req, res) => {
+router.get('/:teamId', async (req: Request, res: Response) => {
   try {
     const { teamId } = req.params;
     const files = await FileModel.find({ team: teamId }).sort({ createdAt: -1 });

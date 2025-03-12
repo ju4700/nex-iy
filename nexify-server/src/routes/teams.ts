@@ -1,16 +1,38 @@
 import express, { Router } from 'express';
-import { TeamModel, UserModel } from '../models';
+// Import models individually
+import { TeamModel } from '../models/team';
+import { UserModel } from '../models/user';
 import { body, validationResult } from 'express-validator';
 import logger from '../logger';
 
 const router: Router = express.Router();
+
+interface CreateTeamRequest {
+  name: string;
+}
+
+interface CreateTeamResponse {
+  team: typeof TeamModel.prototype;
+}
+
+interface AuthUser {
+  id: string;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: AuthUser;
+    }
+  }
+}
 
 router.post(
   '/create',
   [
     body('name').trim().notEmpty().withMessage('Team name is required'),
   ],
-  async (req, res) => {
+  async (req: express.Request<{}, {}, CreateTeamRequest>, res: express.Response<CreateTeamResponse | { errors: any[] } | { error: string }>) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -36,13 +58,22 @@ router.post(
   }
 );
 
+interface InviteTeamRequest {
+  teamId: string;
+  memberEmail: string;
+}
+
+interface InviteTeamResponse {
+  team: typeof TeamModel.prototype;
+}
+
 router.post(
   '/invite',
   [
     body('teamId').notEmpty().withMessage('Team ID is required'),
     body('memberEmail').isEmail().withMessage('Invalid email'),
   ],
-  async (req, res) => {
+  async (req: express.Request<{}, {}, InviteTeamRequest>, res: express.Response<InviteTeamResponse | { errors: any[] } | { error: string }>) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });

@@ -10,16 +10,16 @@ export interface User {
   export interface Team {
     _id: string;
     name: string;
-    owner: string; // User ID
-    members: string[]; // Array of User IDs
+    owner: string; 
+    members: string[]; 
     createdAt: Date;
   }
   
   export interface Message {
     _id: string;
     text: string;
-    user: string; // User ID
-    team: string; // Team ID
+    user: string; 
+    team: string;
     createdAt: Date;
   }
   
@@ -27,8 +27,8 @@ export interface User {
     _id: string;
     title: string;
     status: 'todo' | 'in-progress' | 'done';
-    assignedTo: string[]; // Array of User IDs
-    team: string; // Team ID
+    assignedTo: string[];
+    team: string;
     createdAt: Date;
   }
   
@@ -36,7 +36,7 @@ export interface User {
     _id: string;
     name: string;
     url: string;
-    uploadedBy: string; // User ID
-    team: string; // Team ID
+    uploadedBy: string; 
+    team: string;
     createdAt: Date;
   }

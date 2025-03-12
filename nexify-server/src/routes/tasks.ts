@@ -33,6 +33,16 @@ router.get('/:teamId', async (req, res) => {
   }
 });
 
+interface TaskRequestBody {
+  title: string;
+  assignedTo?: string[];
+  status?: 'todo' | 'in-progress' | 'done';
+}
+
+interface TaskResponse {
+  data: typeof TaskModel.prototype;
+}
+
 router.post(
   '/:teamId',
   [
@@ -40,7 +50,7 @@ router.post(
     body('assignedTo').optional().isArray().withMessage('AssignedTo must be an array'),
     body('status').optional().isIn(['todo', 'in-progress', 'done']).withMessage('Invalid status'),
   ],
-  async (req, res) => {
+  async (req: express.Request<{ teamId: string }, any, TaskRequestBody>, res: express.Response<TaskResponse | { errors: any[] } | { error: string }>) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -60,12 +70,20 @@ router.post(
   }
 );
 
+interface TaskUpdateBody {
+  status: 'todo' | 'in-progress' | 'done';
+}
+
+interface TaskUpdateResponse {
+  data: typeof TaskModel.prototype;
+}
+
 router.put(
   '/:taskId',
   [
     body('status').isIn(['todo', 'in-progress', 'done']).withMessage('Invalid status'),
   ],
-  async (req, res) => {
+  async (req: express.Request<{ taskId: string }, any, TaskUpdateBody>, res: express.Response<TaskUpdateResponse | { errors: any[] } | { error: string }>) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
