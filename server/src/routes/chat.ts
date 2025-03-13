@@ -1,29 +1,27 @@
-import express from 'express';
-import { Message } from '../models/Message';
+import { Router } from 'express';
+import mongoose from 'mongoose';
+import { authMiddleware } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/:roomId', async (req, res) => {
-  try {
-    const messages = await Message.find({ roomId: req.params.roomId })
-      .populate('userId', 'name')
-      .sort({ timestamp: 1 })
-      .limit(100);
-    res.json(messages);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: (err as Error).message });
-  }
+const messageSchema = new mongoose.Schema({
+  roomId: String,
+  message: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  timestamp: { type: Date, default: Date.now },
+  threadId: { type: String, default: null },
 });
 
-router.post('/', async (req, res) => {
-  const { roomId, message } = req.body;
-  try {
-    const newMessage = new Message({ roomId, message, userId: req.user?.id });
-    await newMessage.save();
-    res.status(201).json(newMessage);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: (err as Error).message });
-  }
+const Message = mongoose.model('Message', messageSchema);
+
+router.get('/:roomId', authMiddleware, async (req, res) => {
+  const messages = await Message.find({ roomId: req.params.roomId }).populate('userId', 'name');
+  res.json(messages);
+});
+
+router.post('/channel', authMiddleware, async (req, res) => {
+  const { name } = req.body;
+  res.json({ roomId: name.toLowerCase().replace(/\s/g, '-'), name });
 });
 
 export default router;

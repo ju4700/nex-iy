@@ -1,52 +1,57 @@
 .sidebar {
-  width: 280px;
+  width: 80px;
+  height: 100vh;
   background: #1a3c5e;
-  color: #ffffff;
-  padding: 30px 20px;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
 }
 
 .sidebar-header h2 {
-  font-size: 26px;
+  font-size: 24px;
+  color: #1a73e8;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  margin-bottom: 40px;
 }
 
-.sidebar-nav ul {
-  list-style: none;
-  margin-top: 40px;
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.sidebar-nav li {
-  margin: 15px 0;
-}
-
-.sidebar-nav a {
+.nav-item {
+  background: none;
+  border: none;
   color: #b3c7dd;
-  font-size: 16px;
-  font-weight: 500;
-  padding: 12px 15px;
-  display: block;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  font-size: 24px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.sidebar-nav a:hover {
-  background-color: #2a5d8e;
+.nav-item:hover {
   color: #ffffff;
-  transform: translateX(5px);
-  text-decoration: none;
 }
 
-.sidebar-footer button {
-  width: 100%;
-  background-color: #e63946;
-  margin-top: 20px;
+.logout-btn {
+  background: none;
+  border: none;
+  color: #b3c7dd;
+  font-size: 24px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: auto;
+  transition: all 0.3s ease;
 }
 
-.sidebar-footer button:hover {
-  background-color: #c53030;
+.logout-btn:hover {
+  color: #ffffff;
 }

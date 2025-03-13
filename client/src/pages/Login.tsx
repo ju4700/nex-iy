@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useUserStore } from '../store/user';
 import axios from 'axios';
 import '../styles/login.css';
@@ -17,23 +18,29 @@ const Login = () => {
       const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       localStorage.setItem('token', data.token);
       setUser(data.user);
-      navigate('/');
+      navigate('/app');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.message || 'Invalid credentials.');
     }
   };
 
   return (
-    <div className="login-wrapper">
-      <div className="login-container">
-        <div className="login-header">
-          <h1>StartupSync</h1>
-          <p className="subtitle">Log in to your account</p>
+    <div className="auth-wrapper">
+      <motion.div
+        className="auth-container card"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="auth-header">
+          <h1>NEXIF</h1>
+          <p>Log in to your workspace</p>
         </div>
-        <form onSubmit={handleLogin} className="login-form">
+        <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label className="form-label" htmlFor="email">Email</label>
             <input
+              className="form-input"
               type="email"
               id="email"
               value={email}
@@ -43,8 +50,9 @@ const Login = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label className="form-label" htmlFor="password">Password</label>
             <input
+              className="form-input"
               type="password"
               id="password"
               value={password}
@@ -53,13 +61,20 @@ const Login = () => {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit">Log In</button>
+          {error && <p className="error-text">{error}</p>}
+          <motion.button
+            className="btn btn-primary"
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Log In
+          </motion.button>
         </form>
-        <p className="signup-prompt">
-          New to StartupSync? <a href="/register">Create an account</a>
+        <p className="auth-footer">
+          New here? <a href="/register">Sign Up</a>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

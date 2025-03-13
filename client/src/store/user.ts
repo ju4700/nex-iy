@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 
-type UserState = {
-  user: { id: string; name: string; role: string; email: string } | null;
-  setUser: (user: UserState['user']) => void;
-};
+interface User {
+  id: string;
+  name: string;
+  role: string;
+  team: string;
+}
 
-export const useUserStore = create<UserState>((set) => ({
+interface UserStore {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
+export const useUserStore = create<UserStore>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
 }));

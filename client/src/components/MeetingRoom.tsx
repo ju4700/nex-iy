@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import '../styles/meeting.css';
@@ -6,6 +7,7 @@ import '../styles/meeting.css';
 const MeetingRoom = () => {
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [agenda, setAgenda] = useState('');
 
   useEffect(() => {
     const quill = new Quill('#editor', {
@@ -27,21 +29,51 @@ const MeetingRoom = () => {
 
   return (
     <div className="meeting-container">
-      <h2>Meeting Room</h2>
-      <div className="meeting-tools">
+      <motion.h2
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        Meeting Room
+      </motion.h2>
+      <motion.div
+        className="meeting-tools"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="timer">
           <span>
-            Timer: {Math.floor(timer / 3600)}:{Math.floor((timer % 3600) / 60).toString().padStart(2, '0')}:
+            {Math.floor(timer / 3600)}:{Math.floor((timer % 3600) / 60).toString().padStart(2, '0')}:
             {(timer % 60).toString().padStart(2, '0')}
           </span>
-          <button onClick={toggleTimer}>{isRunning ? 'Pause' : 'Start'}</button>
-          <button onClick={() => setTimer(0)}>Reset</button>
+          <button className="btn btn-primary" onClick={toggleTimer}>{isRunning ? 'Pause' : 'Start'}</button>
+          <button className="btn btn-secondary" onClick={() => setTimer(0)}>Reset</button>
         </div>
-      </div>
-      <div className="meeting-notes">
-        <h3>Collaborative Notes</h3>
-        <div id="editor" style={{ height: '300px' }}></div>
-      </div>
+      </motion.div>
+      <motion.div
+        className="meeting-agenda"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <h3>Agenda</h3>
+        <textarea
+          className="form-textarea"
+          value={agenda}
+          onChange={(e) => setAgenda(e.target.value)}
+          placeholder="Enter today’s agenda..."
+        />
+      </motion.div>
+      <motion.div
+        className="meeting-notes"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+      >
+        <h3>Notes</h3>
+        <div id="editor" className="editor"></div>
+      </motion.div>
     </div>
   );
 };

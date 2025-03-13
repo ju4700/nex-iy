@@ -1,79 +1,45 @@
 .app-wrapper {
   display: flex;
   min-height: 100vh;
-  background: #f5f6f8;
+  background: #eef2f7;
 }
 
 .app-main {
   flex: 1;
+  margin-left: 80px;
   padding: 40px;
-  overflow-y: hidden;
 }
 
 .dashboard-header {
   margin-bottom: 40px;
+  padding: 20px;
 }
 
 .dashboard-header h1 {
-  font-size: 28px;
-  color: #1a3c5e;
+  margin-bottom: 8px;
 }
 
 .role {
+  color: #64748b;
   font-size: 16px;
-  color: #6b7280;
-  margin-top: 4px;
 }
 
-.dashboard-content {
-  height: calc(100vh - 140px); 
-  overflow-y: auto; /* Scroll only the content */
-  padding-right: 10px; /* Space for scrollbar */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #1a73e8 #e5e7eb; /* Firefox */
+.dashboard-section {
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #1a73e8 #e5e7eb;
 }
 
-.dashboard-content::-webkit-scrollbar {
+.dashboard-section::-webkit-scrollbar {
   width: 8px;
-  position: sticky;
-  top: 0;
 }
 
-.dashboard-content::-webkit-scrollbar-thumb {
+.dashboard-section::-webkit-scrollbar-thumb {
   background: #1a73e8;
   border-radius: 4px;
 }
 
-.dashboard-content::-webkit-scrollbar-track {
+.dashboard-section::-webkit-scrollbar-track {
   background: #e5e7eb;
-}
-
-.dashboard-section {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  transition: box-shadow 0.3s ease;
-}
-
-.dashboard-section:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1a3c5e;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #1a73e8;
-  padding-bottom: 8px;
-}
-
-.chat-container,
-.task-board-container,
-.checkin-container,
-.meeting-container {
-  padding: 0;
 }

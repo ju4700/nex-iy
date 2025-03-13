@@ -1,0 +1,75 @@
+.home-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a3c5e 0%, #1a73e8 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.home-header {
+  text-align: center;
+  padding: 80px 0 60px;
+}
+
+.home-header h1 {
+  font-size: 64px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+
+.tagline {
+  font-size: 24px;
+  color: #b3c7dd;
+  margin: 20px 0 40px;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.cta-buttons .btn {
+  padding: 14px 32px;
+  font-size: 18px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 20px 60px;
+}
+
+.feature-card {
+  padding: 30px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.feature-card h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.feature-card p {
+  font-size: 16px;
+  color: #d1d5db;
+}
+
+.home-footer {
+  padding: 20px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  color: #b3c7dd;
+  font-size: 14px;
+}

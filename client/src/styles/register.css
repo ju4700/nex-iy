@@ -1,68 +1,33 @@
-.register-wrapper {
+.auth-wrapper {
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(145deg, #1a3c5e 0%, #2a5d8e 100%);
+  background: linear-gradient(135deg, #1a3c5e 0%, #1a73e8 100%);
 }
 
-.register-container {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.auth-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
+  padding: 40px;
 }
 
-.register-header {
+.auth-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
-.register-header h1 {
-  font-size: 32px;
-  color: #1a3c5e;
+.auth-header h1 {
+  color: #1a73e8;
   margin-bottom: 8px;
 }
 
-.subtitle {
-  font-size: 16px;
-  color: #6b7280;
+.auth-header p {
+  color: #64748b;
 }
 
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 8px;
-}
-
-.form-group select {
-  background: #ffffff;
-  cursor: pointer;
-}
-
-.error-message {
-  color: #dc2626;
-  font-size: 14px;
+.auth-footer {
   text-align: center;
-  margin: -10px 0 20px;
-  background: #fef2f2;
-  padding: 8px;
-  border-radius: 6px;
-}
-
-.login-prompt {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #6b7280;
+  margin-top: 24px;
+  color: #64748b;
 }

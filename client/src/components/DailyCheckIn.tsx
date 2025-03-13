@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import '../styles/checkin.css';
 
@@ -29,39 +30,64 @@ const DailyCheckIn = () => {
 
   return (
     <div className="checkin-container">
-      <h2>Daily Check-In</h2>
-      <form onSubmit={submitCheckIn} className="checkin-form">
+      <motion.h2
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        Daily Check-In
+      </motion.h2>
+      <motion.form
+        onSubmit={submitCheckIn}
+        className="checkin-form"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="form-group">
-          <label htmlFor="goals">Today’s Goals</label>
+          <label className="form-label" htmlFor="goals">Today’s Goals</label>
           <textarea
+            className="form-textarea"
             id="goals"
             value={goals}
             onChange={(e) => setGoals(e.target.value)}
-            placeholder="What do you plan to achieve today?"
+            placeholder="What’s on your agenda today?"
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="roadblocks">Roadblocks</label>
+          <label className="form-label" htmlFor="roadblocks">Roadblocks</label>
           <textarea
+            className="form-textarea"
             id="roadblocks"
             value={roadblocks}
             onChange={(e) => setRoadblocks(e.target.value)}
-            placeholder="Any challenges or obstacles?"
+            placeholder="Any obstacles in your way?"
           />
         </div>
-        <button type="submit">Submit Check-In</button>
-      </form>
-      <div className="checkin-history">
+        <button className="btn btn-primary" type="submit">Submit</button>
+      </motion.form>
+      <motion.div
+        className="checkin-history"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
         <h3>Recent Check-Ins</h3>
-        {reports.slice(0, 5).map((report) => (
-          <div key={report._id} className="checkin-entry">
+        {reports.slice(0, 5).map((report, idx) => (
+          <motion.div
+            key={report._id}
+            className="checkin-entry card"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+          >
             <p><strong>{report.userId.name}</strong> - {new Date(report.date).toLocaleDateString()}</p>
             <p><strong>Goals:</strong> {report.goals}</p>
             {report.roadblocks && <p><strong>Roadblocks:</strong> {report.roadblocks}</p>}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 };

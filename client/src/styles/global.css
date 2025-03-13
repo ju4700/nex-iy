@@ -1,71 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
-  background-color: #f5f6f8;
-  color: #2a2a2a;
-  line-height: 1.6;
+  background: #eef2f7;
+  color: #0f172a;
   font-size: 16px;
+  line-height: 1.5;
 }
 
-h1, h2, h3 {
-  color: #1a3c5e;
-  font-weight: 700;
+h1 { font-size: 36px; font-weight: 700; }
+h2 { font-size: 28px; font-weight: 600; }
+h3 { font-size: 20px; font-weight: 500; }
+
+/* Card Template */
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
-button {
-  padding: 12px 24px;
+/* Button Template */
+.btn {
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  background-color: #1a73e8;
-  color: white;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-button:hover {
-  background-color: #1557b0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.btn-primary {
+  background: #1a73e8;
+  color: #ffffff;
 }
 
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.btn-primary:hover {
+  background: #1557b0;
+  transform: scale(1.05);
 }
 
-input, select, textarea {
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  width: 100%;
+.btn-secondary {
+  background: #e5e7eb;
+  color: #0f172a;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* Form Template */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
   font-size: 14px;
-  background-color: #ffffff;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 8px;
+  display: block;
 }
 
-input:focus, select:focus, textarea:focus {
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
   border-color: #1a73e8;
   box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
   outline: none;
 }
 
-a {
-  color: #1a73e8;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
-a:hover {
-  color: #1557b0;
+.error-text {
+  color: #e63946;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #fef2f2;
+  border-radius: 6px;
 }

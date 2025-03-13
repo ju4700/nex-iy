@@ -1,7 +1,13 @@
+import { motion } from 'framer-motion';
 import { useUserStore } from '../store/user';
+import { FaComments, FaTasks, FaClipboardCheck, FaVideo, FaSignOutAlt } from 'react-icons/fa';
 import '../styles/sidebar.css';
 
-const Sidebar = () => {
+interface SidebarProps {
+  setActiveSection: (section: string) => void;
+}
+
+const Sidebar = ({ setActiveSection }: SidebarProps) => {
   const setUser = useUserStore((state) => state.setUser);
 
   const logout = () => {
@@ -9,24 +15,47 @@ const Sidebar = () => {
     setUser(null);
   };
 
+  const navItems = [
+    { id: 'chat', icon: <FaComments />, label: 'Chat' },
+    { id: 'tasks', icon: <FaTasks />, label: 'Tasks' },
+    { id: 'checkin', icon: <FaClipboardCheck />, label: 'Check-In' },
+    { id: 'meeting', icon: <FaVideo />, label: 'Meeting' },
+  ];
+
   return (
-    <aside className="sidebar">
+    <motion.aside
+      className="sidebar"
+      initial={{ x: -260 }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
       <div className="sidebar-header">
-        <h2>StartupSync</h2>
+        <h2>NEXIF</h2>
       </div>
       <nav className="sidebar-nav">
-        <ul>
-          <li><a href="#dashboard">Dashboard</a></li>
-          <li><a href="#chat">Chat</a></li>
-          <li><a href="#tasks">Tasks</a></li>
-          <li><a href="#checkin">Daily Check-In</a></li>
-          <li><a href="#meeting">Meeting Room</a></li>
-        </ul>
+        {navItems.map((item) => (
+          <motion.button
+            key={item.id}
+            className="nav-item"
+            onClick={() => setActiveSection(item.id)}
+            whileHover={{ scale: 1.1, backgroundColor: '#2a5d8e' }}
+            whileTap={{ scale: 0.95 }}
+            title={item.label}
+          >
+            {item.icon}
+          </motion.button>
+        ))}
       </nav>
-      <div className="sidebar-footer">
-        <button onClick={logout}>Logout</button>
-      </div>
-    </aside>
+      <motion.button
+        className="logout-btn"
+        onClick={logout}
+        whileHover={{ scale: 1.1, backgroundColor: '#e63946' }}
+        whileTap={{ scale: 0.95 }}
+        title="Logout"
+      >
+        <FaSignOutAlt />
+      </motion.button>
+    </motion.aside>
   );
 };
 

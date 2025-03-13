@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import '../styles/register.css';
 
@@ -8,35 +9,39 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('member');
+  const [team, setTeam] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const teams = ['Design', 'Engineering', 'Product', 'Marketing', 'Operations'];
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
-        email,
-        password,
-        name,
-        role,
-      });
+      await axios.post('http://localhost:5000/api/auth/register', { email, password, name, role, team });
       navigate('/login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed.');
     }
   };
 
   return (
-    <div className="register-wrapper">
-      <div className="register-container">
-        <div className="register-header">
-          <h1>StartupSync</h1>
-          <p className="subtitle">Create your account</p>
+    <div className="auth-wrapper">
+      <motion.div
+        className="auth-container card"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="auth-header">
+          <h1>NEXIF</h1>
+          <p>Join the workspace</p>
         </div>
-        <form onSubmit={handleRegister} className="register-form">
+        <form onSubmit={handleRegister}>
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+            <label className="form-label" htmlFor="name">Full Name</label>
             <input
+              className="form-input"
               type="text"
               id="name"
               value={name}
@@ -46,8 +51,9 @@ const Register = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label className="form-label" htmlFor="email">Email</label>
             <input
+              className="form-input"
               type="email"
               id="email"
               value={email}
@@ -57,8 +63,9 @@ const Register = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label className="form-label" htmlFor="password">Password</label>
             <input
+              className="form-input"
               type="password"
               id="password"
               value={password}
@@ -68,8 +75,9 @@ const Register = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="role">Role</label>
+            <label className="form-label" htmlFor="role">Role</label>
             <select
+              className="form-select"
               id="role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -80,13 +88,35 @@ const Register = () => {
               <option value="member">Member</option>
             </select>
           </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit">Sign Up</button>
+          <div className="form-group">
+            <label className="form-label" htmlFor="team">Team</label>
+            <select
+              className="form-select"
+              id="team"
+              value={team}
+              onChange={(e) => setTeam(e.target.value)}
+              required
+            >
+              <option value="">Select a team</option>
+              {teams.map((t) => (
+                <option key={t} value={t.toLowerCase()}>{t}</option>
+              ))}
+            </select>
+          </div>
+          {error && <p className="error-text">{error}</p>}
+          <motion.button
+            className="btn btn-primary"
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Sign Up
+          </motion.button>
         </form>
-        <p className="login-prompt">
-          Already have an account? <a href="/login">Log in</a>
+        <p className="auth-footer">
+          Have an account? <a href="/login">Log In</a>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

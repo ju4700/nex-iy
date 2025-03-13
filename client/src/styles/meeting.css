@@ -1,23 +1,40 @@
+.meeting-container {
+  padding: 0;
+}
+
+.meeting-container h2 {
+  margin-bottom: 24px;
+  color: #1a3c5e;
+}
+
 .meeting-tools {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .timer span {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   margin-right: 15px;
+  color: #1a73e8;
 }
 
+.meeting-agenda,
 .meeting-notes {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
-#editor {
-  background: #f9fafb;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  height: 300px;
+.meeting-agenda h3,
+.meeting-notes h3 {
+  margin-bottom: 12px;
+  color: #1a73e8;
+}
+
+.editor {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  height: 350px;
 }
