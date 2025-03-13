@@ -1,0 +1,53 @@
+.checkin-container {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+  }
+  
+  .checkin-container h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  
+  .checkin-form {
+    margin-bottom: 30px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    color: #4a5568;
+  }
+  
+  .form-group textarea {
+    height: 120px;
+    resize: vertical;
+    background: #f9fafb;
+  }
+  
+  .checkin-history h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .checkin-entry {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+  }
+  
+  .checkin-entry p {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .checkin-entry strong {
+    color: #1a3c5e;
+  }

@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUserStore } from './store/user';
+import Sidebar from './components/Sidebar';
+import Chat from './components/Chat';
+import TaskBoard from './components/TaskBoard';
+import DailyCheckIn from './components/DailyCheckIn';
+import MeetingRoom from './components/MeetingRoom';
+import './styles/app.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    if (!user && !localStorage.getItem('token')) navigate('/login');
+  }, [user, navigate]);
+
+  if (!user) return null;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="app-container">
+      <Sidebar />
+      <main className="main-content">
+        <section id="dashboard" className="section">
+          <h1>Welcome, {user.name}</h1>
+          <p>Your role: {user.role}</p>
+        </section>
+        <section id="chat" className="section">
+          <Chat roomId="general" />
+        </section>
+        <section id="tasks" className="section">
+          <TaskBoard />
+        </section>
+        <section id="checkin" className="section">
+          <DailyCheckIn />
+        </section>
+        <section id="meeting" className="section">
+          <MeetingRoom />
+        </section>
+      </main>
+    </div>
+  );
+};
 
-export default App
+export default App;
