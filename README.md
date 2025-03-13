@@ -28,3 +28,4 @@ Role-based Collaboration:
 - Founders, team leads, and interns — all have tailored views, ensuring access to what matters most to them.
 - Real-time feedback loops — send and receive feedback directly on tasks.
 
+---
