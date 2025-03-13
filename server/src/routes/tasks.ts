@@ -37,7 +37,10 @@ router.put('/:id', async (req, res) => {
   try {
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('assignedTo createdBy', 'name email');
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
     res.json(task);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: (err as Error).message });
@@ -48,7 +51,10 @@ router.post('/:id/comments', async (req, res) => {
   const { text } = req.body;
   try {
     const task = await Task.findById(req.params.id);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      res.status(404).json({ message: 'Task not found' });
+      return;
+    }
     task.comments.push({ userId: req.user?.id, text });
     await task.save();
     res.status(201).json(task);

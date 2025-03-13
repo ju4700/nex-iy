@@ -18,24 +18,27 @@ const Login = () => {
       localStorage.setItem('token', data.token);
       setUser(data.user);
       navigate('/');
-    } catch (err) {
-      setError('Invalid credentials. Please try again.');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1>Login to StartupSync</h1>
-        <form onSubmit={handleLogin}>
+    <div className="login-wrapper">
+      <div className="login-container">
+        <div className="login-header">
+          <h1>StartupSync</h1>
+          <p className="subtitle">Log in to your account</p>
+        </div>
+        <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               required
             />
           </div>
@@ -46,15 +49,15 @@ const Login = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="••••••••"
               required
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button type="submit">Login</button>
+          <button type="submit">Log In</button>
         </form>
-        <p className="signup-link">
-          Don’t have an account? <a href="#">Sign up</a>
+        <p className="signup-prompt">
+          New to StartupSync? <a href="/register">Create an account</a>
         </p>
       </div>
     </div>

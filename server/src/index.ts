@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import redis from 'redis';
+import { createClient } from 'redis'; 
 import { Server } from 'socket.io';
 import http from 'http';
 import cors from 'cors';
@@ -24,8 +24,11 @@ app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(helmet());
 app.use(express.json());
 
-// Redis client
-const redisClient = redis.createClient({ url: process.env.REDIS_URL });
+// Redis client for v4
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+});
+redisClient.on('error', (err) => console.error('Redis Client Error:', err));
 redisClient.connect().catch(err => console.error('Redis connection error:', err));
 
 // MongoDB connection

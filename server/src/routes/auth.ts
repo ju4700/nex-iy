@@ -9,7 +9,10 @@ router.post('/register', async (req, res) => {
   const { email, password, name, role } = req.body;
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already in use' });
+    if (existingUser) {
+      res.status(400).json({ message: 'Email already in use' });
+      return;
+    }
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({ email, password: hashedPassword, name, role });
@@ -25,7 +28,8 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      res.status(401).json({ message: 'Invalid email or password' });
+      return;
     }
 
     user.lastLogin = new Date();
