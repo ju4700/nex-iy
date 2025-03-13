@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import { useUserStore } from './store/user';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import TaskBoard from './components/TaskBoard';
 import DailyCheckIn from './components/DailyCheckIn';
 import MeetingRoom from './components/MeetingRoom';
+import Profile from './pages/Profile';
 import './styles/app.css';
 
 const App = () => {
@@ -15,10 +17,34 @@ const App = () => {
   const [activeSection, setActiveSection] = useState('chat');
 
   useEffect(() => {
-    if (!user && !localStorage.getItem('token')) navigate('/login');
+    const token = localStorage.getItem('token');
+    if (!user && !token) {
+      navigate('/login');
+    } else if (!user && token) {
+      axios.get('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(({ data }) => {
+          useUserStore.getState().setUser({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            team: data.team,
+            workspaces: data.workspaces,
+          });
+        })
+        .catch(() => navigate('/login'));
+    }
   }, [user, navigate]);
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="loading-wrapper">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="app-wrapper">
@@ -29,10 +55,6 @@ const App = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <header className="dashboard-header card">
-          <h1>Hello, {user.name}</h1>
-          <p className="role">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-        </header>
         <AnimatePresence mode="wait">
           {activeSection === 'chat' && (
             <motion.section
@@ -43,7 +65,7 @@ const App = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Chat roomId="general" />
+              <Chat />
             </motion.section>
           )}
           {activeSection === 'tasks' && (
@@ -80,6 +102,18 @@ const App = () => {
               transition={{ duration: 0.3 }}
             >
               <MeetingRoom />
+            </motion.section>
+          )}
+          {activeSection === 'profile' && (
+            <motion.section
+              key="profile"
+              className="dashboard-section card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Profile />
             </motion.section>
           )}
         </AnimatePresence>

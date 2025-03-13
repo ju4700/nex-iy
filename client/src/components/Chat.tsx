@@ -7,15 +7,11 @@ import '../styles/chat.css';
 
 const socket = io('http://localhost:5000');
 
-interface ChatProps {
-  roomId?: string;
-}
-
-const Chat = ({ roomId = 'general' }: ChatProps) => {
+const Chat = () => {
   const [channels, setChannels] = useState<{ roomId: string; name: string }[]>([
     { roomId: 'general', name: 'General' },
   ]);
-  const [activeChannel, setActiveChannel] = useState(roomId);
+  const [activeChannel, setActiveChannel] = useState('general');
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [newChannelName, setNewChannelName] = useState('');

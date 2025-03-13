@@ -1,0 +1,24 @@
+.profile-container {
+    padding: 0;
+  }
+  
+  .profile-container h2 {
+    margin-bottom: 24px;
+    color: #1a3c5e;
+  }
+  
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 500px;
+  }
+  
+  .success-text {
+    color: #34c759;
+    font-size: 14px;
+    margin-top: 8px;
+    padding: 8px;
+    background: #f0fdf4;
+    border-radius: 6px;
+  }

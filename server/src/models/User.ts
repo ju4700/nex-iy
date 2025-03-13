@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, enum: ['founder', 'team_lead', 'intern', 'member'], default: 'member' },
-  team: { type: String, required: true },
+  team: { type: String },
+  workspaces: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' }],
   lastLogin: { type: Date },
 });
 

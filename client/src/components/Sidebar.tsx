@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useUserStore } from '../store/user';
-import { FaComments, FaTasks, FaClipboardCheck, FaVideo, FaSignOutAlt } from 'react-icons/fa';
+import { FaComments, FaTasks, FaClipboardCheck, FaVideo, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import '../styles/sidebar.css';
 
 interface SidebarProps {
@@ -25,7 +25,7 @@ const Sidebar = ({ setActiveSection }: SidebarProps) => {
   return (
     <motion.aside
       className="sidebar"
-      initial={{ x: -260 }}
+      initial={{ x: -80 }}
       animate={{ x: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
@@ -38,7 +38,7 @@ const Sidebar = ({ setActiveSection }: SidebarProps) => {
             key={item.id}
             className="nav-item"
             onClick={() => setActiveSection(item.id)}
-            whileHover={{ scale: 1.1, backgroundColor: '#2a5d8e' }}
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             title={item.label}
           >
@@ -46,15 +46,26 @@ const Sidebar = ({ setActiveSection }: SidebarProps) => {
           </motion.button>
         ))}
       </nav>
-      <motion.button
-        className="logout-btn"
-        onClick={logout}
-        whileHover={{ scale: 1.1, backgroundColor: '#e63946' }}
-        whileTap={{ scale: 0.95 }}
-        title="Logout"
-      >
-        <FaSignOutAlt />
-      </motion.button>
+      <div className="sidebar-footer">
+        <motion.button
+          className="nav-item"
+          onClick={() => setActiveSection('profile')}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title="Profile"
+        >
+          <FaUser />
+        </motion.button>
+        <motion.button
+          className="nav-item logout-btn"
+          onClick={logout}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          title="Logout"
+        >
+          <FaSignOutAlt />
+        </motion.button>
+      </div>
     </motion.aside>
   );
 };

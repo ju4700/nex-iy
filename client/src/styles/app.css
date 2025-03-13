@@ -10,22 +10,8 @@
   padding: 40px;
 }
 
-.dashboard-header {
-  margin-bottom: 40px;
-  padding: 20px;
-}
-
-.dashboard-header h1 {
-  margin-bottom: 8px;
-}
-
-.role {
-  color: #64748b;
-  font-size: 16px;
-}
-
 .dashboard-section {
-  height: calc(100vh - 180px);
+  height: calc(100vh - 80px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #1a73e8 #e5e7eb;

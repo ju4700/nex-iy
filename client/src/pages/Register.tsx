@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useUserStore } from '../store/user';
 import '../styles/register.css';
 
 const Register = () => {
@@ -9,17 +10,31 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('member');
-  const [team, setTeam] = useState('');
+  const [workspaceName, setWorkspaceName] = useState('');
   const [error, setError] = useState('');
+  const setUser = useUserStore((state) => state.setUser);
   const navigate = useNavigate();
-
-  const teams = ['Design', 'Engineering', 'Product', 'Marketing', 'Operations'];
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', { email, password, name, role, team });
-      navigate('/login');
+      const { data } = await axios.post('http://localhost:5000/api/auth/register', {
+        email,
+        password,
+        name,
+        role,
+        workspaceName,
+      });
+      localStorage.setItem('token', data.token);
+      setUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email, 
+        role: data.user.role,
+        team: data.user.team,
+        workspaces: data.user.workspaces.map((w: any) => ({ id: w._id || w, name: w.name })),
+      });
+      navigate('/app');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed.');
     }
@@ -35,7 +50,7 @@ const Register = () => {
       >
         <div className="auth-header">
           <h1>NEXIF</h1>
-          <p>Join the workspace</p>
+          <p>Create your workspace</p>
         </div>
         <form onSubmit={handleRegister}>
           <div className="form-group">
@@ -89,19 +104,16 @@ const Register = () => {
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label" htmlFor="team">Team</label>
-            <select
-              className="form-select"
-              id="team"
-              value={team}
-              onChange={(e) => setTeam(e.target.value)}
+            <label className="form-label" htmlFor="workspaceName">Workspace Name</label>
+            <input
+              className="form-input"
+              type="text"
+              id="workspaceName"
+              value={workspaceName}
+              onChange={(e) => setWorkspaceName(e.target.value)}
+              placeholder="My Workspace"
               required
-            >
-              <option value="">Select a team</option>
-              {teams.map((t) => (
-                <option key={t} value={t.toLowerCase()}>{t}</option>
-              ))}
-            </select>
+            />
           </div>
           {error && <p className="error-text">{error}</p>}
           <motion.button
@@ -110,7 +122,7 @@ const Register = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Sign Up
+            Create Workspace
           </motion.button>
         </form>
         <p className="auth-footer">
