@@ -1,13 +1,41 @@
 import { useState, useEffect } from 'react';
-import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { 
+  DndContext, 
+  DragOverlay, 
+  closestCorners, 
+  KeyboardSensor, 
+  PointerSensor, 
+  useSensor, 
+  useSensors,
+  DragEndEvent 
+} from '@dnd-kit/core';
+import { 
+  arrayMove, 
+  SortableContext, 
+  sortableKeyboardCoordinates, 
+  useSortable 
+} from '@dnd-kit/sortable';
 import axios from 'axios';
 import { useUserStore } from '../store/user';
 import '../styles/tasks.css';
 
-type Task = { _id: string; title: string; status: string; priority: string; description?: string };
+type Task = {
+  _id: string;
+  title: string;
+  status: 'todo' | 'in_progress' | 'done';
+  priority: string;
+  description?: string;
+};
 
-const TaskCard = ({ task }: { task: Task }) => {
+type Columns = {
+  [K in Task['status']]: Task[];
+};
+
+interface TaskCardProps {
+  task: Task;
+}
+
+const TaskCard = ({ task }: TaskCardProps) => {
   const {
     attributes,
     listeners,
@@ -40,6 +68,8 @@ const TaskCard = ({ task }: { task: Task }) => {
 
 const TaskBoard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const user = useUserStore((state) => state.user);
 
   const sensors = useSensors(
@@ -50,12 +80,28 @@ const TaskBoard = () => {
   );
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/tasks', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    }).then(res => setTasks(res.data));
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
+        const response = await axios.get<Task[]>('http://localhost:5000/api/tasks', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        setTasks(response.data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTasks();
   }, []);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -64,25 +110,38 @@ const TaskBoard = () => {
 
     const overContainer = over.data?.current?.sortable?.containerId || over.id;
     
-    const updatedTasks = tasks.map(task => 
-      task._id === activeTask._id 
-        ? { ...task, status: overContainer }
-        : task
-    );
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No authentication token found');
 
-    setTasks(updatedTasks);
-    
-    axios.put(`http://localhost:5000/api/tasks/${activeTask._id}`, 
-      { status: overContainer },
-      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-    );
+      const updatedTasks = tasks.map(task => 
+        task._id === activeTask._id 
+          ? { ...task, status: overContainer as Task['status'] }
+          : task
+      );
+
+      setTasks(updatedTasks);
+      
+      await axios.put(
+        `http://localhost:5000/api/tasks/${activeTask._id}`, 
+        { status: overContainer },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update task');
+      // Revert the state if the API call fails
+      setTasks([...tasks]);
+    }
   };
 
-  const columns = {
+  const columns: Columns = {
     todo: tasks.filter(t => t.status === 'todo'),
     in_progress: tasks.filter(t => t.status === 'in_progress'),
     done: tasks.filter(t => t.status === 'done'),
   };
+
+  if (isLoading) return <div>Loading tasks...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="task-board-container">
@@ -97,7 +156,7 @@ const TaskBoard = () => {
             <div key={status} className="task-column">
               <h3>{status.replace('_', ' ').toUpperCase()} ({columnTasks.length})</h3>
               <SortableContext items={columnTasks.map(task => task._id)}>
-                {columnTasks.map((task: Task) => (
+                {columnTasks.map((task) => (
                   <TaskCard key={task._id} task={task} />
                 ))}
               </SortableContext>
