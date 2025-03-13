@@ -70,5 +70,3 @@ Design Process for Startup Management Platform:
 - **Custom Dashboards:** Tailored views for founders, team leads, and interns — dynamic widgets highlight relevant tasks and updates.
 - **Feedback Loops:** Inline feedback on tasks — simply hover over a task to leave or view comments.
 
-The design will balance simplicity and functionality, ensuring seamless collaboration with a sleek, professional look. Let me know if you'd like mockups for specific sections!
-
